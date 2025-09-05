@@ -23,11 +23,6 @@ async def admin_only(event):
         )
         raise events.StopPropagation
 
-    elif incomingText == '/get_ip':
-        ip = ni.ifaddresses('enp1s0')[ni.AF_INET][0]['addr']
-        await event.respond(str(ip))
-        raise events.StopPropagation
-
     elif incomingText == '/bkp':
         await create_and_send_backup()
         await event.respond("Backup sent.")

@@ -11,7 +11,7 @@ tcp-latency
 gTTS
 emoji-country-flag
 demoji
-apscheduler
+apscheduler==3.10.4
 sqlalchemy
 arrow
 pathvalidate

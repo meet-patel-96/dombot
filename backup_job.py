@@ -11,7 +11,7 @@ job_scheduler = AsyncIOScheduler()
 async def create_and_send_backup():
     # Copy the database so it can be contained in backup
     r.save()
-    os.system("cp /var/lib/redis/dump.rdb .")
+    subprocess.run("cp /var/lib/redis/dump.rdb .", shell=True, executable="/bin/bash")
     dir_name = os.path.basename(os.getcwd())
     current_time = arrow.now().format("DD_MM_YYYY-HH_mm_ss")
     bot_dir = os.getcwd()
@@ -25,7 +25,6 @@ async def create_and_send_backup():
     if os.path.exists(zip_file_path):
         try:
             os.remove(zip_file_path)
-            os.remove("dump.rdb")
             print(f"{current_time} Backup sent.")
         except Exception as e:
             print("Failed remove: ", e)
