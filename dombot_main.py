@@ -1,5 +1,22 @@
 from vars import bot, dom, D0MiNiX
+import signal, os, subprocess
+import atexit
+process = None
 
+def cleanup_process():
+    """
+    Terminates the background process if it is still running.
+    """
+    global process
+    if process and process.poll() is None:
+        print("Main script exiting. Terminating background process...")
+        process.terminate()  # Use process.kill() for a more forceful termination
+        process.wait()      # Wait for the process to fully terminate
+        print("Background process terminated.")
+    else:
+        print("Background process was already terminated or never started.")
+
+atexit.register(cleanup_process)
 
 def main():
     # from dombot.typo_tales.dragon_egg import dragon_egg
@@ -77,8 +94,23 @@ def main():
     bot.send_message(D0MiNiX, "`commenced`")
     print("commenced")
 
+    # start pepe
+    global process
+    os.chdir("../eine_pepe_bot")
+    cmd = "java -jar -Dconfig.file=application.conf ./bot/target/scala-2.12/bot-assembly-0.1.jar bot"
+    process = subprocess.Popen(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    os.chdir("../dombot")
+
     dom.run_until_disconnected()
     print("\nRDB saved." if r.save() else "Error saving RDB!")
 
+    pid = os.getppid()
+    subprocess.run(f"kill -9 {pid}", shell=True)
+
+def on_tstp(a, b):
+    pid = os.getppid()
+    subprocess.run(f"kill -9 {pid}", shell=True)
+
 if __name__ == '__main__':
+    signal.signal(signal.SIGTSTP, on_tstp)
     main()
