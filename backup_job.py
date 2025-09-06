@@ -10,7 +10,8 @@ job_scheduler = AsyncIOScheduler()
 
 async def create_and_send_backup():
     # Copy the database so it can be contained in backup
-    os.system("cp /var/lib/redis/dump.rdb .")
+    r.save()
+    subprocess.run("cp /var/lib/redis/dump.rdb .", shell=True, executable="/bin/bash")
     dir_name = os.path.basename(os.getcwd())
     current_time = arrow.now().format("DD_MM_YYYY-HH_mm_ss")
     bot_dir = os.getcwd()
@@ -24,7 +25,6 @@ async def create_and_send_backup():
     if os.path.exists(zip_file_path):
         try:
             os.remove(zip_file_path)
-            os.remove("dump.rdb")
             print(f"{current_time} Backup sent.")
         except Exception as e:
             print("Failed remove: ", e)
@@ -54,9 +54,9 @@ def create_backup_job():
     job_scheduler.configure(timezone="Asia/Kolkata")
     job_scheduler.start()
     job_scheduler.add_job(create_and_send_backup, 'cron', hour='20', minute='00')
-    job_scheduler.add_job(rdb_backup, 'cron', hour="*", minute="*/30", misfire_grace_time=None)
+    job_scheduler.add_job(rdb_backup, 'cron', hour="*", minute="40", misfire_grace_time=None)
     job_scheduler.add_job(remind_vpb, 'cron', hour=21, minute=0, misfire_grace_time=None)
-    job_scheduler.add_job(remind_glory, 'cron', hour=12, minute=45, misfire_grace_time=None)
-    job_scheduler.add_job(remind_glory, 'cron', hour=20, minute=45, misfire_grace_time=None)
-    job_scheduler.add_job(remind_glory, 'cron', hour=4, minute=45, misfire_grace_time=None)
+    #job_scheduler.add_job(remind_glory, 'cron', hour=12, minute=45, misfire_grace_time=None)
+    #job_scheduler.add_job(remind_glory, 'cron', hour=20, minute=45, misfire_grace_time=None)
+    #job_scheduler.add_job(remind_glory, 'cron', hour=4, minute=45, misfire_grace_time=None)
     #sched_cw_jbs(job_scheduler)
