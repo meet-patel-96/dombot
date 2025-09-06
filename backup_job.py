@@ -9,22 +9,37 @@ DOMBOT_BACKUP_CHANNEL = -1001463171286
 job_scheduler = AsyncIOScheduler()
 
 async def create_and_send_backup():
+    db_list = [
+        "./dombot/rss/databases/sqlite/equipments.db",
+        "./dombot/rss/databases/sqlite/filters.db",
+        "./dombot/rss/databases/sqlite/monsters.db",
+        "./dombot/rss/databases/sqlite/triggers.db",
+        "./dombot/rss/databases/sqlite/timezones.db",
+        "./dombot/rss/databases/sqlite/regions.db",
+        "./dombot/rss/databases/sqlite/reminders/jobs.db",
+        "./dombot/rss/databases/sqlite/reminders/reminders.db",
+        "./dombot/typo_tales/dragon_egg/dragon_egg.db",
+        "/var/lib/redis/dump.rdb"
+    ]
+
     # Copy the database so it can be contained in backup
     r.save()
-    subprocess.run("cp /var/lib/redis/dump.rdb .", shell=True, executable="/bin/bash")
-    dir_name = os.path.basename(os.getcwd())
+    bkp_dir = "backup"
+    os.makedirs(bkp_dir, exist_ok=True)
+    os.system(f"pg_dump -U dom -f {bkp_dir}/pepe.bkp dom -Fc")
+
+    for db in db_list:
+        shutil.copy(db, bkp_dir)
+
     current_time = arrow.now().format("DD_MM_YYYY-HH_mm_ss")
-    bot_dir = os.getcwd()
-    os.chdir("..")
-    curr_dir = os.getcwd()
-    zip_file_name = f"{curr_dir}/dombot_backup_{current_time}"
-    zip_file_path = shutil.make_archive(zip_file_name, "zip", f"{curr_dir}/{dir_name}")
+    zip_file_name = f"backup_{current_time}"
+    zip_file_path = shutil.make_archive(zip_file_name, "zip", f"{bkp_dir}")
     await vars.bot.send_file(DOMBOT_BACKUP_CHANNEL, file=f"{zip_file_path}")
-    os.chdir(bot_dir)
 
     if os.path.exists(zip_file_path):
         try:
             os.remove(zip_file_path)
+            shutil.rmtree(bkp_dir)
             print(f"{current_time} Backup sent.")
         except Exception as e:
             print("Failed remove: ", e)
