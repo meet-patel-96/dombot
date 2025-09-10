@@ -385,6 +385,21 @@ async def triggers(event):
 
 		raise events.StopPropagation
 
+	elif cmd("get_id"):
+
+		if not event.is_reply:
+			await event.reply("Please reply to a message that contains media.")
+			raise events.StopPropagation
+
+		reply = await event.get_reply_message()
+
+		if reply.media:
+			await event.reply(f"File ID: `{reply.file.id}`")
+		else:
+			await event.reply("The replied message doesn't contain any media.")
+
+		raise events.StopPropagation
+
 	elif event.chat_id in triggers_dict and event.raw_text.lower() in triggers_dict[event.chat_id]:
 		db_query = DatabaseQuery(table_name=event.chat_id, values=["file_id", "trigger_text", "msg_id", "is_fwd"], \
 									trig_name=event.raw_text.lower())
