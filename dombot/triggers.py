@@ -12,7 +12,7 @@ triggers_dict = {}
 data_for_callback = {}
 TRIGGERS_FOLDER = "triggers_data"
 db_conn = None
-
+MONKE_CHAT_ID = -1001352937293
 
 try:
     db_conn = db.connect(r"dombot/rss/databases/sqlite/triggers.db", isolation_level=None)
@@ -400,6 +400,11 @@ async def triggers(event):
 
 		raise events.StopPropagation
 
+	if hasattr(event, "file") and hasattr(event.file, "id") and event.file.id == "CAADBAADghgAAg73-VDJH5SaNAfZ-QI":
+		if (event.chat_id == MONKE_CHAT_ID or (event.is_private and event.chat_id == bot_vars.D0MiNiX)):
+			await event.reply(file="BAADBQADJRcAAibxcFXiMEF6Z1WUsgI")
+		raise events.StopPropagation
+
 	elif event.chat_id in triggers_dict and event.raw_text.lower() in triggers_dict[event.chat_id]:
 		db_query = DatabaseQuery(table_name=event.chat_id, values=["file_id", "trigger_text", "msg_id", "is_fwd"], \
 									trig_name=event.raw_text.lower())
@@ -443,7 +448,6 @@ async def triggers(event):
 
 		raise events.StopPropagation
 
-MONKE_CHAT_ID = -1001352937293 
 n = 0
 import random
 from dombot.monsters import r
